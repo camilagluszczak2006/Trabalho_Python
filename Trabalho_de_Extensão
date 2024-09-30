@@ -1,0 +1,32 @@
+import pandas as pd
+from cassandra.cluster import Cluster 
+cluster = Cluster(['localhost'])
+session = cluster.connect('estoque_db')
+item_df = pd.DataFrame(columns=['nome_do_item', 'quantidade', 'descricao','validade'])
+def adicionar_item(nome_do_item, quantidade, descricao,validade):
+nova_linha = pd.DataFrame({'nome_do_item': [nome_do_item], 'quantidade': [quantidade], 'descricao': [descricao],'validade' : [validade]})
+item_df = item_df.append(nova_linha, ignore_index=True)
+session.execute("INSERT INTO itens (nome_do_item, quantidade, descricao) VALUES (%s, %s, %s)", (nome_do_item, quantidade, descricao)
+return item_df
+import tkinter as tk
+root = tk.Tk()
+root.title("Sistema de Controle de Estoque")
+entrada_nome_do_item = tk.Entry(root)
+entrada_quantidade = tk.Entry(root)
+entrada_descricao = tk.Entry(root)
+
+botao_adicionar_item = tk.Button(root, text="Adicionar Item", command=lambda: adicionar_item(entrada_nome_do_item.get(), entrada_quantidade.get(), entrada_descricao.get()))
+
+tabela_itens = tk.Treeview(root, columns=['nome_do_item', 'quantidade', 'descricao'])
+tabela_itens.heading('nome_do_item', text='Nome do Item')
+tabela_itens.heading('quantidade', text='Quantidade')
+tabela_itens.heading('descricao', text='Descrição')
+tabela_itens.heading('validade', text='Validade')
+
+entrada_nome_do_item.grid(row=0, column=0)
+entrada_quantidade.grid(row=0, column=1)
+entrada_descricao.grid(row=0, column=2)
+botao_adicionar_item.grid(row=1, column=0, columnspan=3)
+tabela_itens.grid(row=2, column=0, columnspan=3)
+
+root.mainloop()
